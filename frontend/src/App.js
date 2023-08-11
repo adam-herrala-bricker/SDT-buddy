@@ -1,4 +1,5 @@
 import {useState} from 'react'
+import DisplayMetrics from './components/metrics'
 
 //component for loading previously saved dataset from DB
 const Load = () => {
@@ -202,7 +203,10 @@ const App = () => {
       <button onClick = {handleReset}>reset application</button>
       <Load />
       <Add handleInputChange = {handleInputChange} handleBulkDataChange = {handleBulkDataChange} handleAddDatum = {handleAddDatum} newDatum = {newDatum} bulkEntry={bulkEntry} currentBulkData = {currentBulkData} rowNumber = {rowNumber}/>
-      <Current currentData = {currentData} deleteMode = {deleteMode} deleteRow = {deleteRow}/>
+      <div className = 'flexbox-container'>
+        <Current currentData = {currentData} deleteMode = {deleteMode} deleteRow = {deleteRow}/>
+        <DisplayMetrics currentData = {currentData}/>
+      </div>
     </div>
   )
 }
