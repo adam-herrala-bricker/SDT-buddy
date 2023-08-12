@@ -1,5 +1,6 @@
 //keeping all the code for calculating and displaying the SDT metrics seperated here
 import {useState, useEffect} from 'react'
+import {probit} from 'simple-statistics'
 
 const HeaderRow = ({metrics}) => {
     return(
@@ -23,8 +24,7 @@ const Columnizer = ({metrics, rowIDs, defaultMetrics}) => {
 }
 
 const DisplayMetrics = ({currentData}) => {
-    //const rowIDs = ['HR', 'MR', 'CRR', 'FAR', 'dPrimeLit', 'dPrimeCor', 'cLit', 'cCor']
-    const rowIDs = ['HR', 'MR']
+    const rowIDs = ['HR', 'MR', 'CRR', 'FAR', 'dPrimeLit', 'dPrimeCor', 'cLit', 'cCor']
     const defaultMetrics = {metric : {cond: 'metric', HR: 'HR', MR: 'MR', CRR: 'CRR', FAR: 'FAR', dPrimeLit: "d' (literal)", dPrimeCor: "d' (corrected)", cLit: "c (literal)", cCor: "c (corrected)"}}
 
     const [metrics, setMetrics] = useState(defaultMetrics)
@@ -40,26 +40,49 @@ const DisplayMetrics = ({currentData}) => {
 
     }
 
+    //execute updateAll everytime currentData changes
     useEffect(updateAll, [currentData])
 
-    //helper functions for calcuations
+    //function for d'
+    const dPrime = (HR, FAR) => {return((probit(HR) - probit(FAR)).toFixed(3))}
+    
+    //function for criterion
+    const criterion = (HR, FAR) => {return(-.5*(probit(HR) + probit(FAR)).toFixed(3))}
+
+    //main function for calcuations
     const hrCalculator = (conditionsArray) => {
         const allConditions = conditionsArray.concat('overall')
-        console.log(allConditions)
 
         const newMetrics = allConditions.reduce((accumulator, condition) => {
-            //console.log('accumulator',accumulator)
-            //console.log('condition', condition)
             //filter if condition given
             const condData = condition === 'overall' ? currentData : currentData.filter(i => i.condition === condition)
             
+            //calculate HR and MR
             const yesResponsesStim = condData.filter(i => i.response === "1" & i.stimulus === "1").length
             const stimTrials = condData.filter(i => i.stimulus === "1").length
 
             const hitRate = (yesResponsesStim/stimTrials).toFixed(3)
             const missRate = (1-hitRate).toFixed(3)
 
-            return({...accumulator, [condition]: {cond: [condition], HR: hitRate, MR: missRate}})
+            //calculate CRR and FAR
+            const yesResponsesNoStim = condData.filter(i => i.response === '1' & i.stimulus === '0').length
+            const noStimTrials = condData.filter(i => i.stimulus === '0').length
+
+            const faRate = (yesResponsesNoStim/noStimTrials).toFixed(3)
+            const crRate = (1-faRate).toFixed(3)
+
+            //literal d' and criterion
+            const dPrimeLit = dPrime(hitRate, faRate)
+            const cLit = criterion(hitRate, faRate)
+            
+            //corrected d' and criterion
+            const adjustedHR = hitRate === '1.000' ? (stimTrials-1)/stimTrials : hitRate
+            const adjustedFAR = faRate === '0.000' ? 1/noStimTrials : faRate
+            const dPrimeCor = dPrime(adjustedHR, adjustedFAR)
+            const cCor = criterion(adjustedHR, adjustedFAR)
+
+
+            return({...accumulator, [condition]: {cond: [condition], HR: hitRate, MR: missRate, CRR: crRate, FAR: faRate, dPrimeLit : dPrimeLit, dPrimeCor: dPrimeCor, cLit: cLit, cCor: cCor}})
     
         }, {})
 
@@ -73,7 +96,7 @@ const DisplayMetrics = ({currentData}) => {
     }
     return(
         <div>
-            <h2>Metrics</h2>
+            <h2>Accuracy metrics</h2>
             <table>
                 <thead>
                     <tr>
