@@ -1,0 +1,22 @@
+### PUT request for creating new (empty) entry
+POST http://localhost:3001/api/subjects/
+Content-Type: application/json
+
+{
+  
+}
+
+### Put request for updating existing entry
+PUT http://localhost:3001/api/subject/64d9e9a1a92d6d68190f1916
+Content-Type: application/json
+
+{
+    "data" : [{"rowNum" : "1", "condition" : "control", "stimulus" : "1", "response" : "1"}]
+}
+
+
+### checking all the data
+GET http://localhost:3001/api/subjects/
+
+### checking single subject data
+GET http://localhost:3001/api/subjects/64d9e9a1a92d6d68190f1916
