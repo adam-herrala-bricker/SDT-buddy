@@ -1,10 +1,15 @@
 import {useState} from 'react'
 import DisplayMetrics from './components/metrics'
+import serverKamu from './services/serverKamu'
 
 //component for loading previously saved dataset from DB
-const Load = () => {
+const Load = ({loadKey, handleKeyChange, handleLoad}) => {
   return(
-    <h2>Load existing dataset</h2>
+    <div>
+      <h2>Load existing dataset</h2>
+      <input id='inputKey' size='25' value={loadKey} onChange= {handleKeyChange}/>
+      <button onClick = {handleLoad}>load</button>
+    </div>
   )
 }
 
@@ -122,6 +127,7 @@ const App = () => {
   const [bulkEntry, setEntryMode] = useState(false) //whether app is in bulk entry mode
   const [currentBulkData, setCurrentBulkData] = useState('') //value of text in bulk entry
   const [rowNumber, setRowNumber] = useState(1)
+  const [loadKey, setLoadKey] = useState('enter key . . .')
 
   //helper functions
   //this converts arrays to objects in the bulk data change handler
@@ -172,6 +178,7 @@ const App = () => {
     setDeleteMode(false)
     setRowNumber(1)
     setCurrentBulkData('')
+    setLoadKey('enter key . . .')
   }
 
   const toggleDeleteMode = () => {
@@ -194,14 +201,44 @@ const App = () => {
     setCurrentBulkData(arrayToString(newData))
   }
 
+  const handleKeyChange = (event) => {
+    setLoadKey(event.target.value)
+  }
+
+  const handleCreateNew = () => {
+    serverKamu
+    .createNew()
+    .then(response => {
+      setLoadKey(response.id)
+    })
+  }
+
+  const handleSave = () => {
+    const dataToSave = {data: currentData} 
+    serverKamu
+    .saveData(loadKey, dataToSave) 
+    .then(response => {console.log(response)})//will want visual feedback on save
+    .catch(error => console.log(error))
+
+    //will 100% need better error handling here too
+  }
+
+  const handleLoad = () => {
+    serverKamu
+    .loadData(loadKey)
+    .then(response => {setCurrentData(response.data)})
+  }
+
+
   return(
     <div>
       <h1>SDT Buddy</h1>
-      <button>save dataset</button>
+      <button onClick = {handleCreateNew}>new save key</button>
+      <button onClick = {handleSave}>save dataset</button>
       <button onClick = {toggleEntryMode}>toggle entry mode</button>
       <button onClick = {toggleDeleteMode}>toggle edit mode</button>
       <button onClick = {handleReset}>reset application</button>
-      <Load />
+      <Load loadKey = {loadKey} handleKeyChange = {handleKeyChange} handleLoad = {handleLoad}/>
       <Add handleInputChange = {handleInputChange} handleBulkDataChange = {handleBulkDataChange} handleAddDatum = {handleAddDatum} newDatum = {newDatum} bulkEntry={bulkEntry} currentBulkData = {currentBulkData} rowNumber = {rowNumber}/>
       <div className = 'flexbox-container'>
         <Current currentData = {currentData} deleteMode = {deleteMode} deleteRow = {deleteRow}/>

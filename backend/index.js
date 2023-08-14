@@ -52,7 +52,7 @@ app.post('/api/subjects', (request, response) => {
 })
 
 //put request for saving data (using put bc we want it to do the same thing everytime --> replace old w new dataset)
-app.put('/api/subject/:id', (request, response, next) => {
+app.put('/api/subjects/:id', (request, response, next) => {
     const body = request.body
     const thisID = request.params.id
     const updates = {data : body.data}

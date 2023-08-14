@@ -4,3 +4,7 @@
     align-items: flex-start;
     gap: 70px;
 }
+
+button {
+    margin-left: 2px;
+}
