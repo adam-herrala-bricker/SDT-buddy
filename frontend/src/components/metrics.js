@@ -41,6 +41,7 @@ const DisplayMetrics = ({currentData}) => {
     }
 
     //execute updateAll everytime currentData changes
+    // eslint-disable-next-line
     useEffect(updateAll, [currentData])
 
     //function for d'
