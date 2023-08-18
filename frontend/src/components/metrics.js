@@ -99,7 +99,7 @@ const DisplayMetrics = ({currentData}) => {
         <div>
             <h2>Accuracy metrics</h2>
             <table>
-                <thead>
+                <thead className='boader-head'>
                     <tr>
                     <th></th>
                     <HeaderRow metrics = {metrics}/>

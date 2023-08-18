@@ -17,6 +17,36 @@
     opacity: .65;
 }
 
+.no-boader-head {
+    font-size: 18px;
+    padding-right: 10px;
+}
+
+.boader-head {padding-right: 10px;
+    font-size: 18px;
+    border-bottom-style: double;
+}
+
 button {
     margin-left: 2px;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+th {
+    padding-right: 12px;
+}
+
+td {
+    padding: 4px;
+}
+
+tr:nth-child(even){
+    background-color: #f2f2f2;
+}
+
+td:nth-child(1) {
+    font-weight: bolder;
 }

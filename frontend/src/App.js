@@ -15,9 +15,9 @@ const Load = ({loadKey, handleKeyChange, handleLoad}) => {
 }
 
 //mini-component for table headers
-const TableHeader = () => {
+const TableHeader = ({className}) => {
   return(
-    <thead>
+    <thead className={className}>
     <tr>
       <th>trial number</th>
       <th>condition</th>
@@ -48,7 +48,7 @@ const Add = ({handleInputChange, handleAddDatum, newDatum, bulkEntry, currentBul
       <h2>Add new data (single entry mode)</h2>
       <form onSubmit={handleAddDatum} autoComplete='off'>
         <table>
-          <TableHeader />
+          <TableHeader className='no-boader-head'/>
           <tbody>
             <tr>
               <td><input id = 'trialNumber' value = {rowNumber} readOnly/></td>
@@ -89,8 +89,6 @@ const Row = ({currentData, deleteMode, deleteRow}) => {
       </tr>
       )
   )
-  
-  
 }
 
 //component for displaying data currently loaded into the app
@@ -109,7 +107,7 @@ const Current = ({currentData, deleteMode, deleteRow}) => {
     <div>
       <h2>Current data</h2>
       <table>
-        <TableHeader />
+        <TableHeader className='boader-head'/>
         <tbody>
           <Row currentData = {currentData} deleteMode = {deleteMode} deleteRow = {deleteRow}/>
         </tbody>
