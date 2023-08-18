@@ -1,6 +1,7 @@
-import {useState} from 'react'
+import {useState, useEffect} from 'react'
 import DisplayMetrics from './components/metrics'
 import serverKamu from './services/serverKamu'
+import {fullEqualityChecker} from './utilities/objectHelper'
 
 //component for loading previously saved dataset from DB
 const Load = ({loadKey, handleKeyChange, handleLoad}) => {
@@ -36,7 +37,7 @@ const Add = ({handleInputChange, handleAddDatum, newDatum, bulkEntry, currentBul
       <div>
         <h2>Add new data (bulk entry mode)</h2>
         <p>structure each line: trialNumber;condition;stimulus;response</p>
-        <p>important: don't repeat trial numbers!</p>
+        <p><b>IMPORTANT: don't repeat trial numbers!</b></p>
         <textarea value={currentBulkData} onChange = {handleBulkDataChange}rows='10' cols='40'></textarea>
       </div>
     )
@@ -128,6 +129,7 @@ const App = () => {
   const [currentBulkData, setCurrentBulkData] = useState('') //value of text in bulk entry
   const [rowNumber, setRowNumber] = useState(1)
   const [loadKey, setLoadKey] = useState('enter key . . .')
+  const [saveStatus, setSaveStatus] = useState('untracked')
 
   //helper functions
   //this converts arrays to objects in the bulk data change handler
@@ -153,7 +155,7 @@ const App = () => {
   const handleAddDatum = (event) => {
     event.preventDefault() //this stops the form submit from re-loading the page
     //add unique row number for use in "key" prop in table 
-    const datumToAdd = {...newDatum, rowNum : rowNumber} //need new variable to avoid async issues . . .
+    const datumToAdd = {...newDatum, rowNum : rowNumber.toString()} //need new variable to avoid async issues . . .
     setCurrentData(currentData.concat(datumToAdd))
     //avoid bug where mashing "add" sends multiple entries to currentData
     setNewDatum(emptyDatum)
@@ -168,7 +170,6 @@ const App = () => {
       .map(i => i.split(';'))
       .map(i => arrayToObject(i))
     setCurrentData(structuredBulkEntry)
-    
   }
 
   const handleReset = () => {
@@ -179,6 +180,7 @@ const App = () => {
     setRowNumber(1)
     setCurrentBulkData('')
     setLoadKey('enter key . . .')
+    setSaveStatus('untracked')
   }
 
   const toggleDeleteMode = () => {
@@ -214,30 +216,92 @@ const App = () => {
   }
 
   const handleSave = () => {
-    const dataToSave = {data: currentData} 
-    serverKamu
-    .saveData(loadKey, dataToSave) 
-    .then(response => {console.log(response)})//will want visual feedback on save
-    .catch(error => console.log(error))
-
-    //will 100% need better error handling here too
+    if (loadKey.length > 0) { //don't do anything if no load key
+      const dataToSave = {data: currentData} 
+      serverKamu
+      .saveData(loadKey, dataToSave) 
+      .then(() => {
+        setSaveStatus('saved')
+      })
+      .catch(error => {
+        window.alert(`${error.message}.\n${error.response.data.error}`)
+     })
+    }
   }
 
   const handleLoad = () => {
+    loadKey.length > 0 &&
     serverKamu
     .loadData(loadKey)
-    .then(response => {setCurrentData(response.data)})
+    .then(response => {
+      setCurrentData(response.data)
+      setRowNumber(response.data.length + 1)
+
+      //need to seperately load bulk data if in bulk mode
+      if (bulkEntry) {
+        setCurrentBulkData(arrayToString(response.data))
+      }
+    })
+    .catch(error => {
+      window.alert(`${error.message}:\n '${loadKey}' is an invalid save key.`)
+    })
   }
+
+  //more robust way of determining what visual feedback to render re. save status
+  const checkForUnsavedChanges = () => {
+    //only checking if the key is the right length and there is current data
+    if (loadKey.length === 24 & currentData.length > 0) {
+      serverKamu
+      .loadData(loadKey)
+      .then(response => {
+        const foundData = response.data
+        if (fullEqualityChecker(foundData, currentData)) {
+          setSaveStatus('saved')
+        } else {
+          setSaveStatus('unsaved')
+        }
+      })
+      .catch(() => {
+        setSaveStatus('unsaved')
+      })
+    } else { //not in the right state for saving
+      setSaveStatus('untracked')
+    }
+  }
+
+  useEffect(checkForUnsavedChanges, [loadKey, currentData])
+
+  //want sorted in integer order, not string order
+  const sortCurrentData = () => {
+    const sorterer = (a,b) => {
+      const intA = Number(a.rowNum)
+      const intB = Number(b.rowNum)
+
+      if (intA > intB) {
+        return 1
+      } else if (intA < intB) {
+        return -1
+      } else {
+        return 0
+      }
+    }
+
+    currentData.sort(sorterer)
+
+  }
+
+  useEffect(sortCurrentData, [currentData])
 
 
   return(
     <div>
       <h1>SDT Buddy</h1>
       <button onClick = {handleCreateNew}>new save key</button>
-      <button onClick = {handleSave}>save dataset</button>
+      <button onClick = {handleSave} className = {saveStatus}>save dataset</button>
       <button onClick = {toggleEntryMode}>toggle entry mode</button>
       <button onClick = {toggleDeleteMode}>toggle edit mode</button>
       <button onClick = {handleReset}>reset application</button>
+      <button>help</button>
       <Load loadKey = {loadKey} handleKeyChange = {handleKeyChange} handleLoad = {handleLoad}/>
       <Add handleInputChange = {handleInputChange} handleBulkDataChange = {handleBulkDataChange} handleAddDatum = {handleAddDatum} newDatum = {newDatum} bulkEntry={bulkEntry} currentBulkData = {currentBulkData} rowNumber = {rowNumber}/>
       <div className = 'flexbox-container'>

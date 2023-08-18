@@ -36,7 +36,7 @@ app.get('/api/subjects/:id', (request, response, next) => {
         if (entry) {
             response.json(entry)
         } else {
-            response.status(404).end()
+            response.status(404).send({error: 'invaild load key'})
         }
     })
     .catch(error => next(error))
@@ -73,7 +73,7 @@ const errorHandler = (error, request, response, next) => {
     if (error.name === 'CastError') {
         return response.status(400).send({ error: 'malformed id' })
     } else if (error.name === 'ValidationError') {
-        return response.status(400).json({ error: error.message })
+        return response.status(400).json({ error: 'This error is usually raised when trying to save a stimulus or response other than 1 or 0.'})
     }
 
     next(error)

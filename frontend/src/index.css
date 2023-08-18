@@ -5,6 +5,18 @@
     gap: 70px;
 }
 
+.unsaved {
+    color: red;
+}
+
+.saved{
+    color: green;
+}
+
+.untracked{
+    opacity: .65;
+}
+
 button {
     margin-left: 2px;
 }
