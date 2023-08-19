@@ -3,8 +3,8 @@ const fullEqualityChecker = (arr1, arr2) => {
     let isEqual = false
 
     //get everything in the same order
-    //arr1.sort(sortObjects)
-    //arr2.sort(sortObjects)
+    arr1.sort(sortObjects)
+    arr2.sort(sortObjects)
 
     //only need to keep going if they have the same length
     if (arr1.length === arr2.length) {
