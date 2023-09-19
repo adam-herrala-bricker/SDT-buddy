@@ -1,5 +1,6 @@
 import {useState, useEffect} from 'react'
 import DisplayMetrics from './components/metrics'
+import HelpText from './components/HelpText'
 import serverKamu from './services/serverKamu'
 import {fullEqualityChecker} from './utilities/objectHelper'
 
@@ -128,6 +129,7 @@ const App = () => {
   const [rowNumber, setRowNumber] = useState(1)
   const [loadKey, setLoadKey] = useState('enter key . . .')
   const [saveStatus, setSaveStatus] = useState('untracked')
+  const [displayHelp, setDisplayHelp] = useState(false)
 
   //helper functions
   //this converts arrays to objects in the bulk data change handler
@@ -179,6 +181,7 @@ const App = () => {
     setCurrentBulkData('')
     setLoadKey('enter key . . .')
     setSaveStatus('untracked')
+    setDisplayHelp(false)
   }
 
   const toggleDeleteMode = () => {
@@ -294,12 +297,15 @@ const App = () => {
   return(
     <div>
       <h1>SDT Buddy</h1>
-      <button onClick = {handleCreateNew}>new save key</button>
-      <button onClick = {handleSave} className = {saveStatus}>save dataset</button>
-      <button onClick = {toggleEntryMode}>toggle entry mode</button>
-      <button onClick = {toggleDeleteMode}>toggle edit mode</button>
-      <button onClick = {handleReset}>reset application</button>
-      <button>help</button>
+      <div className = 'button-container'>
+        <button onClick = {handleCreateNew}>new save key</button>
+        <button onClick = {handleSave} className = {saveStatus}>save dataset</button>
+        <button onClick = {toggleEntryMode}>toggle entry mode</button>
+        <button onClick = {toggleDeleteMode}>toggle edit mode</button>
+        <button onClick = {handleReset}>reset application</button>
+        <button onClick = {() => setDisplayHelp(!displayHelp)} className = {displayHelp ? 'dark-button' : ''}>help</button>
+      </div>
+      {displayHelp && <HelpText />}
       <Load loadKey = {loadKey} handleKeyChange = {handleKeyChange} handleLoad = {handleLoad}/>
       <Add handleInputChange = {handleInputChange} handleBulkDataChange = {handleBulkDataChange} handleAddDatum = {handleAddDatum} newDatum = {newDatum} bulkEntry={bulkEntry} currentBulkData = {currentBulkData} rowNumber = {rowNumber}/>
       <div className = 'flexbox-container'>

@@ -5,6 +5,34 @@
     gap: 70px;
 }
 
+.text-container {
+    max-width: 600px;
+}
+
+.button-container {
+    position: sticky;
+    top: 1px;
+
+    display: flex;
+    flex-wrap: wrap;
+    row-gap: 2px;
+
+    background-color: white;
+}
+
+.dark-button {
+    background-color: darkblue;
+    color: white;
+    border-style: solid;
+    border-radius: 3px;
+    border-width: 2px;
+    border-color: black;
+}
+
+.dark-button:hover {
+    background-color: darkslateblue;
+}
+
 .unsaved {
     color: red;
 }
