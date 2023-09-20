@@ -1,6 +1,9 @@
 import {useState, useEffect} from 'react'
+import { useDispatch } from 'react-redux'
+import { notifier } from './reducers/notificationReducer'
 import DisplayMetrics from './components/metrics'
 import HelpText from './components/HelpText'
+import Notifications from './components/Notifications'
 import serverKamu from './services/serverKamu'
 import {fullEqualityChecker} from './utilities/objectHelper'
 
@@ -130,6 +133,9 @@ const App = () => {
   const [loadKey, setLoadKey] = useState('enter key . . .')
   const [saveStatus, setSaveStatus] = useState('untracked')
   const [displayHelp, setDisplayHelp] = useState(false)
+  const [notificationText, setNotificationText] = useState('text')
+
+  const dispatch = useDispatch() //for notification reducer
 
   //helper functions
   //this converts arrays to objects in the bulk data change handler
@@ -149,7 +155,12 @@ const App = () => {
   const handleInputChange = (event) => {
     const currentInput = event.target.value
     const column = event.target.id
-    setNewDatum({...newDatum, [column] : currentInput}) //note the syntax on column to use the variable value
+    //check for incorrect data format
+    if ((column === 'stimulus' | column === 'response') & (currentInput !== '1' & currentInput !== '0') & currentInput !== ''){
+      dispatch(notifier('entry must be 0 or 1', 'error', 5))
+    } else {
+      setNewDatum({...newDatum, [column] : currentInput}) //note the syntax on column to use the variable value
+    }
   }
 
   const handleAddDatum = (event) => {
@@ -160,6 +171,8 @@ const App = () => {
     //avoid bug where mashing "add" sends multiple entries to currentData
     setNewDatum(emptyDatum)
     setRowNumber(rowNumber + 1)
+    
+    dispatch(notifier('new trial added', 'confirm', 5))
   }
 
   const handleBulkDataChange = (event) => {
@@ -182,6 +195,8 @@ const App = () => {
     setLoadKey('enter key . . .')
     setSaveStatus('untracked')
     setDisplayHelp(false)
+    
+    dispatch(notifier('app reset', 'confirm', 5))
   }
 
   const toggleDeleteMode = () => {
@@ -202,6 +217,7 @@ const App = () => {
     const newData = currentData.filter(i => i.rowNum !== rowNum)
     setCurrentData(newData)
     setCurrentBulkData(arrayToString(newData))
+    dispatch(notifier('trial deleted', 'confirm', 5))
   }
 
   const handleKeyChange = (event) => {
@@ -213,6 +229,10 @@ const App = () => {
     .createNew()
     .then(response => {
       setLoadKey(response.id)
+      dispatch(notifier('new save key created', 'confirm', 5))
+    })
+    .catch(error => {
+      dispatch(notifier(`Error creating save key: ${error.message}`, 'error', 10))
     })
   }
 
@@ -223,9 +243,10 @@ const App = () => {
       .saveData(loadKey, dataToSave) 
       .then(() => {
         setSaveStatus('saved')
+        dispatch(notifier('data saved', 'confirm', 5))
       })
       .catch(error => {
-        window.alert(`${error.message}.\n${error.response.data.error}`)
+        dispatch(notifier(`${error.message}: '${loadKey}' is an invalid save key.`, 'error', 10))
      })
     }
   }
@@ -242,9 +263,11 @@ const App = () => {
       if (bulkEntry) {
         setCurrentBulkData(arrayToString(response.data))
       }
+
+      dispatch(notifier('data loaded', 'confirm', 5))
     })
     .catch(error => {
-      window.alert(`${error.message}:\n '${loadKey}' is an invalid save key.`)
+      dispatch(notifier(`${error.message}: '${loadKey}' is an invalid save key.`, 'error', 10))
     })
   }
 
@@ -296,15 +319,20 @@ const App = () => {
 
   return(
     <div>
-      <h1>SDT Buddy</h1>
-      <div className = 'button-container'>
-        <button onClick = {handleCreateNew}>new save key</button>
-        <button onClick = {handleSave} className = {saveStatus}>save dataset</button>
-        <button onClick = {toggleEntryMode}>toggle entry mode</button>
-        <button onClick = {toggleDeleteMode}>toggle edit mode</button>
-        <button onClick = {handleReset}>reset application</button>
-        <button onClick = {() => setDisplayHelp(!displayHelp)} className = {displayHelp ? 'dark-button' : ''}>help</button>
+      <div className = 'menu-container'>
+        <div className = 'button-container'>
+          <button onClick = {handleCreateNew}>new save key</button>
+          <button onClick = {handleSave} className = {saveStatus}>save dataset</button>
+          <button onClick = {toggleEntryMode}>toggle entry mode</button>
+          <button onClick = {toggleDeleteMode}>toggle edit mode</button>
+          <button onClick = {handleReset}>reset application</button>
+          <button onClick = {() => setDisplayHelp(!displayHelp)} className = {displayHelp ? 'dark-button' : ''}>help</button>
+        </div>
+        <div>
+          <Notifications notificationText = {notificationText} setNotificationText = {setNotificationText}/>
+        </div>
       </div>
+      <h1>SDT Buddy</h1>
       {displayHelp && <HelpText />}
       <Load loadKey = {loadKey} handleKeyChange = {handleKeyChange} handleLoad = {handleLoad}/>
       <Add handleInputChange = {handleInputChange} handleBulkDataChange = {handleBulkDataChange} handleAddDatum = {handleAddDatum} newDatum = {newDatum} bulkEntry={bulkEntry} currentBulkData = {currentBulkData} rowNumber = {rowNumber}/>
