@@ -318,27 +318,34 @@ const App = () => {
 
 
   return(
-    <div>
-      <div className = 'menu-container'>
-        <div className = 'button-container'>
-          <button onClick = {handleCreateNew}>new save key</button>
-          <button onClick = {handleSave} className = {saveStatus}>save dataset</button>
-          <button onClick = {toggleEntryMode}>toggle entry mode</button>
-          <button onClick = {toggleDeleteMode}>toggle edit mode</button>
-          <button onClick = {handleReset}>reset application</button>
-          <button onClick = {() => setDisplayHelp(!displayHelp)} className = {displayHelp ? 'dark-button' : ''}>help</button>
+    <div className = 'root-container'>
+      <div>
+        <div className = 'menu-container'>
+          <div className = 'button-container'>
+            <button onClick = {handleCreateNew}>new save key</button>
+            <button onClick = {handleSave} className = {saveStatus}>save dataset</button>
+            <button onClick = {toggleEntryMode}>toggle entry mode</button>
+            <button onClick = {toggleDeleteMode}>toggle edit mode</button>
+            <button onClick = {handleReset}>reset application</button>
+            <button onClick = {() => setDisplayHelp(!displayHelp)} className = {displayHelp ? 'dark-button' : ''}>help</button>
+          </div>
+          <div>
+            <Notifications notificationText = {notificationText} setNotificationText = {setNotificationText}/>
+          </div>
         </div>
-        <div>
-          <Notifications notificationText = {notificationText} setNotificationText = {setNotificationText}/>
+        <h1>SDT Kamu</h1>
+        {displayHelp && <HelpText />}
+        <Load loadKey = {loadKey} handleKeyChange = {handleKeyChange} handleLoad = {handleLoad}/>
+        <Add handleInputChange = {handleInputChange} handleBulkDataChange = {handleBulkDataChange} handleAddDatum = {handleAddDatum} newDatum = {newDatum} bulkEntry={bulkEntry} currentBulkData = {currentBulkData} rowNumber = {rowNumber}/>
+        <div className = 'flexbox-container'>
+          <Current currentData = {currentData} deleteMode = {deleteMode} deleteRow = {deleteRow}/>
+          <DisplayMetrics currentData = {currentData}/>
         </div>
       </div>
-      <h1>SDT Buddy</h1>
-      {displayHelp && <HelpText />}
-      <Load loadKey = {loadKey} handleKeyChange = {handleKeyChange} handleLoad = {handleLoad}/>
-      <Add handleInputChange = {handleInputChange} handleBulkDataChange = {handleBulkDataChange} handleAddDatum = {handleAddDatum} newDatum = {newDatum} bulkEntry={bulkEntry} currentBulkData = {currentBulkData} rowNumber = {rowNumber}/>
-      <div className = 'flexbox-container'>
-        <Current currentData = {currentData} deleteMode = {deleteMode} deleteRow = {deleteRow}/>
-        <DisplayMetrics currentData = {currentData}/>
+      <div>
+        <footer>
+          SDT Kamu developed by Adam Herrala Bricker for TBMC3001 Psychophysics: Theory and Application. University of Turku. 2023. 
+        </footer>
       </div>
     </div>
   )
