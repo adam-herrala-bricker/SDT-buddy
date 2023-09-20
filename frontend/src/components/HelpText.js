@@ -51,7 +51,7 @@ const HelpText = () => {
                 <p>Once a save key is generated, SDT Kamu will watch for unsaved changes. If the 'save dataset' button is red, this means there are changes to the dataset not saved to the loaded save key. If 'save dataset' is green, this means that all changes are saved.</p>
                 
                 <h3><li>Loading an existing dataset</li></h3>
-                <p>Load an existing dataset using a previously generated save key. Once the dataset is loaded, SDT will automatically watch for changes and indicate unsaved changes by turning the 'save dataset' button red.</p>
+                <p>Load an existing dataset using a previously generated save key. Once the dataset is loaded, SDT Kamu will automatically watch for changes and indicate unsaved changes by turning the 'save dataset' button red.</p>
             </ol>
         </div>
     )
