@@ -2,10 +2,10 @@ const HelpText = () => {
 
     return(
         <div className = 'text-container'>
-            <h2>Using SDT Buddy</h2>
+            <h2>Using SDT Kamu</h2>
             <ol>
                 <h3><li>Overview</li></h3>
-                <p>SDT Buddy helps you check whether an analysis pipeline for detection-theoretic metrics (d' and criterion) is outputting the correct values for single-subject data. It is intended for <b>educational purposes only</b> and should not be used as a research tool.</p>
+                <p>SDT Kamu helps you check whether an analysis pipeline for detection-theoretic metrics (d' and criterion) is outputting the correct values for single-subject data. It is intended for <b>educational purposes only</b> and should not be used as a research tool.</p>
                 <h3><li>Computed values</li></h3>
                 <ul>
                     <li>Hit Rate (HR)</li>
@@ -46,9 +46,9 @@ const HelpText = () => {
                 <p>When edit mode is active, press the minus sign next to a trial to delete it.</p>
                 
                 <h3><li>Saving a dataset</li></h3>
-                <p>While not necessary in order to use the app, SDT Buddy has the option to save a current dataset for future use.</p>
+                <p>While not necessary in order to use the app, SDT Kamu has the option to save a current dataset for future use.</p>
                 <p>To save a dataset for the first time, first click 'new save key' at the top of the page. <b>Keep this save key somewhere you'll remember it,</b> because you'll need it to access saved data in the future.</p>
-                <p>Once a save key is generated, SDT Buddy will watch for unsaved changes. If the 'save dataset' button is red, this means there are changes to the dataset not saved to the loaded save key. If 'save dataset' is green, this means that all changes are saved.</p>
+                <p>Once a save key is generated, SDT Kamu will watch for unsaved changes. If the 'save dataset' button is red, this means there are changes to the dataset not saved to the loaded save key. If 'save dataset' is green, this means that all changes are saved.</p>
                 
                 <h3><li>Loading an existing dataset</li></h3>
                 <p>Load an existing dataset using a previously generated save key. Once the dataset is loaded, SDT will automatically watch for changes and indicate unsaved changes by turning the 'save dataset' button red.</p>
