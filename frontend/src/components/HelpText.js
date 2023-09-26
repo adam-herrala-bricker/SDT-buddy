@@ -39,16 +39,17 @@ const HelpText = () => {
                     <p>Trials from the same condition are grouped automatically.</p>
 
                     <li>Bulk entry mode</li>
-                    <p>Enter csv-structured data with one trial per line. Each line should be ordered: trialNumber;condition;stimulus;response (only use 0 and 1 for stimulus and response fields).</p>
+                    <p>Enter csv-structured data with one trial per line. Each line should be ordered: trialNumber;subject;condition;stimulus;response.</p>
+                    <p>Use only 0 and 1 in stimulus and response fields. Any other values will cause the metrics to compute incorrectly and prevent data from saving.</p>
                     <p><b>NOTE:</b> There is no automatic trial numbering in bulk entry mode, so it's important to ensure that every trial number is unique. Repeat trial numbers may interfere with the app rendering correctly.</p>
                 </ul>
-                
-                <h3><li>Edit mode</li></h3>
-                <p>When edit mode is active, press the minus sign next to a trial to delete it.</p>
 
                 <h3><li>Numbering subjects</li></h3>
                 <p>It is recommended that subjects are numbered uniformly, e.g.: S1, S2, S3, . . . Note that naming a subject 'all' will break the app.</p>
                 
+                <h3><li>Edit mode</li></h3>
+                <p>When edit mode is active, press the minus sign next to a trial to delete it.</p>
+
                 <h3><li>Saving a dataset</li></h3>
                 <p>While not necessary in order to use the app, SDT Kamu has the option to save a current dataset for future use.</p>
                 <p>To save a dataset for the first time, first click 'new save key' at the top of the page. <b>Keep this save key somewhere you'll remember it,</b> because you'll need it to access saved data in the future.</p>
