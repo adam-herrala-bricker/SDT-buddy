@@ -28,7 +28,10 @@ const DisplayMetrics = ({currentData}) => {
     const defaultMetrics = {metric : {cond: 'metric', HR: 'HR', MR: 'MR', CRR: 'CRR', FAR: 'FAR', dPrimeLit: "d' (literal)", dPrimeCor: "d' (corrected)", cLit: "c (literal)", cCor: "c (corrected)"}}
 
     const [metrics, setMetrics] = useState(defaultMetrics)
+    const [thisSubject, setThisSubject] = useState('all')
 
+    //Array of unique subjects (plus 'all')
+    const subjects = Array.from(new Set(currentData.map(i => i.subject))).concat('all')
 
     //event handler for updating
     const updateAll = () => {
@@ -40,9 +43,9 @@ const DisplayMetrics = ({currentData}) => {
 
     }
 
-    //execute updateAll everytime currentData changes
+    //execute updateAll everytime currentData changes (coming back to this, useEffect probably isn't the right method here . . .)
     // eslint-disable-next-line
-    useEffect(updateAll, [currentData])
+    useEffect(updateAll, [currentData, thisSubject])
 
     //function for d'
     const dPrime = (HR, FAR) => {return((probit(HR) - probit(FAR)).toFixed(3))}
@@ -55,8 +58,11 @@ const DisplayMetrics = ({currentData}) => {
         const allConditions = conditionsArray.concat('overall')
 
         const newMetrics = allConditions.reduce((accumulator, condition) => {
+            //filter for given subject (unless thisSubject === 'all')
+            const subjectData = thisSubject === 'all' ? currentData : currentData.filter(i => i.subject === thisSubject)
+
             //filter if condition given
-            const condData = condition === 'overall' ? currentData : currentData.filter(i => i.condition === condition)
+            const condData = condition === 'overall' ? subjectData : subjectData.filter(i => i.condition === condition)
             
             //calculate HR and MR
             const yesResponsesStim = condData.filter(i => i.response === "1" & i.stimulus === "1").length
@@ -98,6 +104,9 @@ const DisplayMetrics = ({currentData}) => {
     return(
         <div>
             <h2>Accuracy metrics</h2>
+            {subjects.map(i => 
+                <button key = {i} onClick = {() => setThisSubject(i)} className = {thisSubject === i ? 'dark-button' : null}>{i}</button>
+            )}
             <table>
                 <thead className='boader-head'>
                     <tr>

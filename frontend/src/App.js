@@ -24,6 +24,7 @@ const TableHeader = ({className}) => {
     <thead className={className}>
     <tr>
       <th>trial number</th>
+      <th>subject</th>
       <th>condition</th>
       <th>stimulus</th>
       <th>response</th>
@@ -35,12 +36,14 @@ const TableHeader = ({className}) => {
 //component for adding new data to the app
 //note: turns out setting the value is important; doesn't work right otherwise
 const Add = ({handleInputChange, handleAddDatum, newDatum, bulkEntry, currentBulkData, handleBulkDataChange, rowNumber}) => {
+  const entryFields = ['subject', 'condition', 'stimulus', 'response']
+  
   //bulk entry mode
   if (bulkEntry) {
     return(
       <div>
         <h2>Add new data (bulk entry mode)</h2>
-        <p>structure each line: trialNumber;condition;stimulus;response</p>
+        <p>structure each line: trialNumber;subject;condition;stimulus;response</p>
         <p><b>IMPORTANT: don't repeat trial numbers!</b></p>
         <textarea value={currentBulkData} onChange = {handleBulkDataChange}rows='10' cols='40'></textarea>
       </div>
@@ -50,19 +53,20 @@ const Add = ({handleInputChange, handleAddDatum, newDatum, bulkEntry, currentBul
   return(
     <div>
       <h2>Add new data (single entry mode)</h2>
-      <form onSubmit={handleAddDatum} autoComplete='off'>
-        <table>
-          <TableHeader className='no-boader-head'/>
-          <tbody>
-            <tr>
-              <td><input id = 'trialNumber' value = {rowNumber} readOnly/></td>
-              <td><input id = 'condition' value = {newDatum.condition} onChange = {handleInputChange}/></td>
-              <td><input id = 'stimulus' value = {newDatum.stimulus} onChange = {handleInputChange}/></td>
-              <td><input id = 'response' value = {newDatum.response} onChange = {handleInputChange} /></td>
-              <td><button type = 'submit' >add</button></td>
-            </tr>
-          </tbody>
-        </table>
+      <form onSubmit={handleAddDatum} autoComplete='off' className='single-entry-container'>
+        <div className='single-entry-field'>
+          <b>trial number</b>
+          <input id = 'trialNumber' value = {rowNumber} readOnly/>
+        </div>
+        {entryFields.map(i => 
+          <div key = {i} className='single-entry-field'>
+            <b>{i}</b>
+            <input id = {i} value = {newDatum[i]} onChange = {handleInputChange}/>
+          </div>
+        )}
+        <div className='single-entry-field'>
+          <button type = 'submit'>add</button>
+        </div>
       </form>
     </div>
   )
@@ -75,6 +79,7 @@ const Row = ({currentData, deleteMode, deleteRow}) => {
       currentData.map(entry =>
         <tr key = {entry.rowNum}>
           <td>{entry.rowNum}</td>
+          <td>{entry.subject}</td>
           <td>{entry.condition}</td>
           <td>{entry.stimulus}</td>
           <td>{entry.response}</td>
@@ -86,6 +91,7 @@ const Row = ({currentData, deleteMode, deleteRow}) => {
     currentData.map(entry =>
       <tr key = {entry.rowNum}>
         <td>{entry.rowNum}</td>
+        <td>{entry.subject}</td>
         <td>{entry.condition}</td>
         <td>{entry.stimulus}</td>
         <td>{entry.response}</td>
@@ -123,7 +129,7 @@ const Current = ({currentData, deleteMode, deleteRow}) => {
 
 const App = () => {
   //states
-  const emptyDatum = {rowNum : '', condition : '', stimulus : '', response : ''}
+  const emptyDatum = {rowNum : '', subject : '', condition : '', stimulus : '', response : ''}
   const [currentData, setCurrentData] = useState([])
   const [newDatum, setNewDatum] = useState (emptyDatum)
   const [deleteMode, setDeleteMode] = useState(false)
@@ -140,7 +146,7 @@ const App = () => {
   //helper functions
   //this converts arrays to objects in the bulk data change handler
   const arrayToObject = (arr) => {
-    return({rowNum : arr[0], condition : arr[1], stimulus : arr[2], response : arr[3]})
+    return({rowNum : arr[0], subject : arr[1], condition : arr[2], stimulus : arr[3], response : arr[4]})
   }
   //this converts an array of data objects to a string for the switch to bulk entry mode
   const arrayToString = (arr) => {
@@ -337,7 +343,7 @@ const App = () => {
         {displayHelp && <HelpText />}
         <Load loadKey = {loadKey} handleKeyChange = {handleKeyChange} handleLoad = {handleLoad}/>
         <Add handleInputChange = {handleInputChange} handleBulkDataChange = {handleBulkDataChange} handleAddDatum = {handleAddDatum} newDatum = {newDatum} bulkEntry={bulkEntry} currentBulkData = {currentBulkData} rowNumber = {rowNumber}/>
-        <div className = 'flexbox-container'>
+        <div className = 'tables-container'>
           <Current currentData = {currentData} deleteMode = {deleteMode} deleteRow = {deleteRow}/>
           <DisplayMetrics currentData = {currentData}/>
         </div>
