@@ -23,7 +23,7 @@ const TableHeader = ({className}) => {
   return(
     <thead className={className}>
     <tr>
-      <th>trial number</th>
+      <th>trial</th>
       <th>subject</th>
       <th>condition</th>
       <th>stimulus</th>
@@ -106,6 +106,8 @@ const Row = ({currentData, deleteMode, deleteRow, sorterer}) => {
 
 //component for displaying data currently loaded into the app
 const Current = ({currentData, deleteMode, deleteRow, sorterer}) => {
+  const [currentSubject, setCurrentSubject] = useState('all') //tracking subject displayed here
+  
   //show nothing if nothing to show
   if (currentData.length === 0) {
     return(
@@ -116,13 +118,26 @@ const Current = ({currentData, deleteMode, deleteRow, sorterer}) => {
     )
   }
 
+  //Array of unique subjects (plus 'all')
+  const subjects = Array.from(new Set(currentData.map(i => i.subject))).concat('all')
+
+  //filter data to display just the selected subject
+  const filteredData = currentSubject === 'all'
+    ? currentData
+    : currentData.filter(i => i.subject === currentSubject)
+
   return(
-    <div>
+    <div className = 'stats-container'>
       <h2>Current data</h2>
+      <div className = 's-button-container'>
+        {subjects.map(i => 
+                  <button key = {i} onClick = {() => setCurrentSubject(i)} className = {currentSubject === i ? 'dark-button' : null}>{i}</button>
+              )}
+      </div>
       <table>
         <TableHeader className='boader-head'/>
         <tbody>
-          <Row sorterer = {sorterer} currentData = {currentData} deleteMode = {deleteMode} deleteRow = {deleteRow}/>
+          <Row sorterer = {sorterer} currentData = {filteredData} deleteMode = {deleteMode} deleteRow = {deleteRow}/>
         </tbody>
       </table>
     </div>
@@ -132,7 +147,7 @@ const Current = ({currentData, deleteMode, deleteRow, sorterer}) => {
 
 const App = () => {
   //states
-  const emptyDatum = {rowNum : '', subject : '', condition : '', stimulus : '', response : ''}
+  const emptyDatum = {rowNum : '', subject : 'S', condition : '', stimulus : '', response : ''}
   const [currentData, setCurrentData] = useState([])
   const [newDatum, setNewDatum] = useState (emptyDatum)
   const [deleteMode, setDeleteMode] = useState(false)

@@ -101,11 +101,13 @@ const DisplayMetrics = ({currentData, thisSubject, setThisSubject}) => {
         return(null)
     }
     return(
-        <div>
+        <div className='stats-container'>
             <h2>Accuracy metrics</h2>
-            {subjects.map(i => 
-                <button key = {i} onClick = {() => setThisSubject(i)} className = {thisSubject === i ? 'dark-button' : null}>{i}</button>
-            )}
+            <div className = 's-button-container'>
+                {subjects.map(i => 
+                    <button key = {i} onClick = {() => setThisSubject(i)} className = {thisSubject === i ? 'dark-button' : null}>{i}</button>
+                )}
+            </div>
             <table>
                 <thead className='boader-head'>
                     <tr>

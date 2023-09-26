@@ -46,11 +46,26 @@
     background-color: white;
 }
 
+.stats-container {
+    display: flex;
+    flex-direction: column;
+
+    max-width: 40vw;
+}
+
 .button-container {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     row-gap: 2px;
+}
+
+.s-button-container {
+    display: flex;
+    flex-wrap: wrap;
+
+    row-gap: 2px;
+    margin-bottom: 10px;
 }
 
 .single-entry-container {
@@ -99,7 +114,8 @@
     padding-right: 10px;
 }
 
-.boader-head {padding-right: 10px;
+.boader-head {
+    padding-right: 10px;
     font-size: 18px;
     border-bottom-style: double;
 }
@@ -113,11 +129,13 @@ table {
 }
 
 th {
-    padding-right: 12px;
+    padding-right: 15px;
+    text-align: left;
 }
 
 td {
     padding: 4px;
+    text-align: left;
 }
 
 tr:nth-child(even){
