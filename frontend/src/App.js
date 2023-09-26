@@ -272,7 +272,7 @@ const App = () => {
         dispatch(notifier('data saved', 'confirm', 5))
       })
       .catch(error => {
-        dispatch(notifier(`${error.message}: Check load key and data formatting.`, 'error', 10))
+        dispatch(notifier(`${error.message}. ${error.response.data.error}`, 'error', 10))
      })
     }
   }
@@ -294,7 +294,7 @@ const App = () => {
       dispatch(notifier('data loaded', 'confirm', 5))
     })
     .catch(error => {
-      dispatch(notifier(`${error.message}: '${loadKey}' is an invalid save key.`, 'error', 10))
+      dispatch(notifier(`${error.message}. ${error.response.data.error}`, 'error', 10))
     })
   }
 
