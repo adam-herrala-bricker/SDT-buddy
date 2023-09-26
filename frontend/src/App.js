@@ -74,9 +74,25 @@ const Add = ({handleInputChange, handleAddDatum, newDatum, bulkEntry, currentBul
 
 //compoent for displaying each row of data
 const Row = ({currentData, deleteMode, deleteRow}) => {
+  //Get that data sorted!
+  const sorterer = (a,b) => {
+    const intA = Number(a.rowNum)
+    const intB = Number(b.rowNum)
+
+    if (intA > intB) {
+      return 1
+    } else if (intA < intB) {
+      return -1
+    } else {
+      return 0
+    }
+  }
+
+  const displayData = currentData.sort(sorterer)
+  
   if (!deleteMode) {
     return(
-      currentData.map(entry =>
+      displayData.map(entry =>
         <tr key = {entry.rowNum}>
           <td>{entry.rowNum}</td>
           <td>{entry.subject}</td>
@@ -88,7 +104,7 @@ const Row = ({currentData, deleteMode, deleteRow}) => {
     )
   }
   return (
-    currentData.map(entry =>
+    displayData.map(entry =>
       <tr key = {entry.rowNum}>
         <td>{entry.rowNum}</td>
         <td>{entry.subject}</td>
@@ -263,7 +279,8 @@ const App = () => {
     .loadData(loadKey)
     .then(response => {
       setCurrentData(response.data)
-      setRowNumber(response.data.length + 1)
+      const responseRows = response.data.map(i => i.rowNum)
+      setRowNumber(responseRows.length === 0 ? 1 : Math.max(...responseRows) + 1)
 
       //need to seperately load bulk data if in bulk mode
       if (bulkEntry) {
@@ -300,27 +317,6 @@ const App = () => {
   }
 
   useEffect(checkForUnsavedChanges, [loadKey, currentData])
-
-  //want sorted in integer order, not string order
-  const sortCurrentData = () => {
-    const sorterer = (a,b) => {
-      const intA = Number(a.rowNum)
-      const intB = Number(b.rowNum)
-
-      if (intA > intB) {
-        return 1
-      } else if (intA < intB) {
-        return -1
-      } else {
-        return 0
-      }
-    }
-
-    currentData.sort(sorterer)
-
-  }
-
-  useEffect(sortCurrentData, [currentData])
 
 
   return(
