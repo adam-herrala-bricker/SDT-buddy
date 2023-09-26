@@ -25,9 +25,13 @@ morgan.token('postRes', function (req ) {
 //Handling requests to server
 
 //get request to load data for all subjects (users won't see this)
+//UPDATE: Removed this so cheeky students can't get a list of every ID on the server
+
+/*
 app.get('/api/subjects', (request, response) => {
     Entry.find({}).then(entries => {response.json(entries)})
 })
+*/
 
 //get request for loading data from single subject
 app.get('/api/subjects/:id', (request, response, next) => {
