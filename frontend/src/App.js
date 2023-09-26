@@ -313,7 +313,8 @@ const App = () => {
         }
       })
       .catch(() => {
-        setSaveStatus('unsaved')
+        setSaveStatus('untracked')
+        dispatch(notifier('unable to connect to server', 'error', 5))
       })
     } else { //not in the right state for saving
       setSaveStatus('untracked')
