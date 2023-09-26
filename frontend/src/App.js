@@ -73,21 +73,8 @@ const Add = ({handleInputChange, handleAddDatum, newDatum, bulkEntry, currentBul
 }
 
 //compoent for displaying each row of data
-const Row = ({currentData, deleteMode, deleteRow}) => {
+const Row = ({currentData, deleteMode, deleteRow, sorterer}) => {
   //Get that data sorted!
-  const sorterer = (a,b) => {
-    const intA = Number(a.rowNum)
-    const intB = Number(b.rowNum)
-
-    if (intA > intB) {
-      return 1
-    } else if (intA < intB) {
-      return -1
-    } else {
-      return 0
-    }
-  }
-
   const displayData = currentData.sort(sorterer)
   
   if (!deleteMode) {
@@ -118,7 +105,7 @@ const Row = ({currentData, deleteMode, deleteRow}) => {
 }
 
 //component for displaying data currently loaded into the app
-const Current = ({currentData, deleteMode, deleteRow}) => {
+const Current = ({currentData, deleteMode, deleteRow, sorterer}) => {
   //show nothing if nothing to show
   if (currentData.length === 0) {
     return(
@@ -135,7 +122,7 @@ const Current = ({currentData, deleteMode, deleteRow}) => {
       <table>
         <TableHeader className='boader-head'/>
         <tbody>
-          <Row currentData = {currentData} deleteMode = {deleteMode} deleteRow = {deleteRow}/>
+          <Row sorterer = {sorterer} currentData = {currentData} deleteMode = {deleteMode} deleteRow = {deleteRow}/>
         </tbody>
       </table>
     </div>
@@ -156,6 +143,7 @@ const App = () => {
   const [saveStatus, setSaveStatus] = useState('untracked')
   const [displayHelp, setDisplayHelp] = useState(false)
   const [notificationText, setNotificationText] = useState('text')
+  const [thisSubject, setThisSubject] = useState('all')
 
   const dispatch = useDispatch() //for notification reducer
 
@@ -166,11 +154,26 @@ const App = () => {
   }
   //this converts an array of data objects to a string for the switch to bulk entry mode
   const arrayToString = (arr) => {
+    const sortedArray = arr.sort(sorterer)
     const newString = arr
       .map(i => Object.values(i))
       .map(i => i.join(';'))
       .join('\n')
     return(newString)
+  }
+
+  //sorting data
+  const sorterer = (a,b) => {
+    const intA = Number(a.rowNum)
+    const intB = Number(b.rowNum)
+
+    if (intA > intB) {
+      return 1
+    } else if (intA < intB) {
+      return -1
+    } else {
+      return 0
+    }
   }
 
   //event handlers
@@ -217,6 +220,7 @@ const App = () => {
     setLoadKey('enter key . . .')
     setSaveStatus('untracked')
     setDisplayHelp(false)
+    setThisSubject('all')
     
     dispatch(notifier('app reset', 'confirm', 5))
   }
@@ -340,8 +344,8 @@ const App = () => {
         <Load loadKey = {loadKey} handleKeyChange = {handleKeyChange} handleLoad = {handleLoad}/>
         <Add handleInputChange = {handleInputChange} handleBulkDataChange = {handleBulkDataChange} handleAddDatum = {handleAddDatum} newDatum = {newDatum} bulkEntry={bulkEntry} currentBulkData = {currentBulkData} rowNumber = {rowNumber}/>
         <div className = 'tables-container'>
-          <Current currentData = {currentData} deleteMode = {deleteMode} deleteRow = {deleteRow}/>
-          <DisplayMetrics currentData = {currentData}/>
+          <Current currentData = {currentData} deleteMode = {deleteMode} deleteRow = {deleteRow} sorterer = {sorterer}/>
+          <DisplayMetrics currentData = {currentData} thisSubject = {thisSubject} setThisSubject = {setThisSubject}/>
         </div>
       </div>
       <div>

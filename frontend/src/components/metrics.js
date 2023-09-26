@@ -23,12 +23,11 @@ const Columnizer = ({metrics, rowIDs, defaultMetrics}) => {
     )
 }
 
-const DisplayMetrics = ({currentData}) => {
+const DisplayMetrics = ({currentData, thisSubject, setThisSubject}) => {
     const rowIDs = ['HR', 'MR', 'CRR', 'FAR', 'dPrimeLit', 'dPrimeCor', 'cLit', 'cCor']
     const defaultMetrics = {metric : {cond: 'metric', HR: 'HR', MR: 'MR', CRR: 'CRR', FAR: 'FAR', dPrimeLit: "d' (literal)", dPrimeCor: "d' (corrected)", cLit: "c (literal)", cCor: "c (corrected)"}}
 
     const [metrics, setMetrics] = useState(defaultMetrics)
-    const [thisSubject, setThisSubject] = useState('all')
 
     //Array of unique subjects (plus 'all')
     const subjects = Array.from(new Set(currentData.map(i => i.subject))).concat('all')
