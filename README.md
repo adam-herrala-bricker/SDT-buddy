@@ -2,6 +2,8 @@
 
 SDT buddy is a web app designed to easily calculate simple metrics commonly used in Signal Detection Theory: hit rate, miss rate, false alarm rate, correct rejection rate, d', and decision criterion.
 
+Link: https://psychophysics-app.utu.fi/
+
 Included funtionality:
 - Two modes of DATA ENTRY: Add data trial-by-trial or all at once in a .csv format.
 - Quickly delete individual lines of data with DELETE MODE.
@@ -17,4 +19,4 @@ and "response" encodes whether a participant response for the target stimulus cl
 - **IMPORTANT:** Row number must be unique for every trial, otherwise the application may not function correctly.
 Single entry mode will force this, but bulk entry may not.
 
-Note also that this app is **not** recommended for use in research applications. I designed it only as a pedagogical tool for my psychophysics course at the University of Turku—something students can use to quickly check whether their analysis pipelines are outputting the correct results.
+Note also that **under no circumstances** should this be used in research applications. I designed it only as a pedagogical tool for my psychophysics course at the University of Turku—something students can use to quickly check whether their analysis pipelines are outputting the correct results.
