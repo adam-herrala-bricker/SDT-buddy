@@ -15,6 +15,7 @@ mongoose.connect(url)
 const datumSchema = new mongoose.Schema(
     {
         rowNum: {type : String, required : true},
+        subject: {type: String, required : true},
         condition: {type : String, required: true},
         stimulus: {type : String, maxLength : 1, required: true, enum : ['1', '0']},
         response: {type : String, maxLength : 1, required: true, enum : ['1', '0']} 
