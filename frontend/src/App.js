@@ -23,7 +23,8 @@ const TableHeader = ({className}) => {
   return(
     <thead className={className}>
     <tr>
-      <th>trial number</th>
+      <th>trial</th>
+      <th>subject</th>
       <th>condition</th>
       <th>stimulus</th>
       <th>response</th>
@@ -35,12 +36,14 @@ const TableHeader = ({className}) => {
 //component for adding new data to the app
 //note: turns out setting the value is important; doesn't work right otherwise
 const Add = ({handleInputChange, handleAddDatum, newDatum, bulkEntry, currentBulkData, handleBulkDataChange, rowNumber}) => {
+  const entryFields = ['subject', 'condition', 'stimulus', 'response']
+  
   //bulk entry mode
   if (bulkEntry) {
     return(
       <div>
         <h2>Add new data (bulk entry mode)</h2>
-        <p>structure each line: trialNumber;condition;stimulus;response</p>
+        <p>structure each line: trialNumber;subject;condition;stimulus;response</p>
         <p><b>IMPORTANT: don't repeat trial numbers!</b></p>
         <textarea value={currentBulkData} onChange = {handleBulkDataChange}rows='10' cols='40'></textarea>
       </div>
@@ -50,31 +53,36 @@ const Add = ({handleInputChange, handleAddDatum, newDatum, bulkEntry, currentBul
   return(
     <div>
       <h2>Add new data (single entry mode)</h2>
-      <form onSubmit={handleAddDatum} autoComplete='off'>
-        <table>
-          <TableHeader className='no-boader-head'/>
-          <tbody>
-            <tr>
-              <td><input id = 'trialNumber' value = {rowNumber} readOnly/></td>
-              <td><input id = 'condition' value = {newDatum.condition} onChange = {handleInputChange}/></td>
-              <td><input id = 'stimulus' value = {newDatum.stimulus} onChange = {handleInputChange}/></td>
-              <td><input id = 'response' value = {newDatum.response} onChange = {handleInputChange} /></td>
-              <td><button type = 'submit' >add</button></td>
-            </tr>
-          </tbody>
-        </table>
+      <form onSubmit={handleAddDatum} autoComplete='off' className='single-entry-container'>
+        <div className='single-entry-field'>
+          <b>trial number</b>
+          <input id = 'trialNumber' value = {rowNumber} readOnly/>
+        </div>
+        {entryFields.map(i => 
+          <div key = {i} className='single-entry-field'>
+            <b>{i}</b>
+            <input id = {i} value = {newDatum[i]} onChange = {handleInputChange}/>
+          </div>
+        )}
+        <div className='single-entry-field'>
+          <button type = 'submit'>add</button>
+        </div>
       </form>
     </div>
   )
 }
 
 //compoent for displaying each row of data
-const Row = ({currentData, deleteMode, deleteRow}) => {
+const Row = ({currentData, deleteMode, deleteRow, sorterer}) => {
+  //Get that data sorted!
+  const displayData = currentData.sort(sorterer)
+  
   if (!deleteMode) {
     return(
-      currentData.map(entry =>
+      displayData.map(entry =>
         <tr key = {entry.rowNum}>
           <td>{entry.rowNum}</td>
+          <td>{entry.subject}</td>
           <td>{entry.condition}</td>
           <td>{entry.stimulus}</td>
           <td>{entry.response}</td>
@@ -83,9 +91,10 @@ const Row = ({currentData, deleteMode, deleteRow}) => {
     )
   }
   return (
-    currentData.map(entry =>
+    displayData.map(entry =>
       <tr key = {entry.rowNum}>
         <td>{entry.rowNum}</td>
+        <td>{entry.subject}</td>
         <td>{entry.condition}</td>
         <td>{entry.stimulus}</td>
         <td>{entry.response}</td>
@@ -96,7 +105,9 @@ const Row = ({currentData, deleteMode, deleteRow}) => {
 }
 
 //component for displaying data currently loaded into the app
-const Current = ({currentData, deleteMode, deleteRow}) => {
+const Current = ({currentData, deleteMode, deleteRow, sorterer}) => {
+  const [currentSubject, setCurrentSubject] = useState('all') //tracking subject displayed here
+  
   //show nothing if nothing to show
   if (currentData.length === 0) {
     return(
@@ -107,13 +118,26 @@ const Current = ({currentData, deleteMode, deleteRow}) => {
     )
   }
 
+  //Array of unique subjects (plus 'all')
+  const subjects = Array.from(new Set(currentData.map(i => i.subject))).concat('all')
+
+  //filter data to display just the selected subject
+  const filteredData = currentSubject === 'all'
+    ? currentData
+    : currentData.filter(i => i.subject === currentSubject)
+
   return(
-    <div>
+    <div className = 'stats-container'>
       <h2>Current data</h2>
+      <div className = 's-button-container'>
+        {subjects.map(i => 
+                  <button key = {i} onClick = {() => setCurrentSubject(i)} className = {currentSubject === i ? 'dark-button' : null}>{i}</button>
+              )}
+      </div>
       <table>
         <TableHeader className='boader-head'/>
         <tbody>
-          <Row currentData = {currentData} deleteMode = {deleteMode} deleteRow = {deleteRow}/>
+          <Row sorterer = {sorterer} currentData = {filteredData} deleteMode = {deleteMode} deleteRow = {deleteRow}/>
         </tbody>
       </table>
     </div>
@@ -123,7 +147,7 @@ const Current = ({currentData, deleteMode, deleteRow}) => {
 
 const App = () => {
   //states
-  const emptyDatum = {rowNum : '', condition : '', stimulus : '', response : ''}
+  const emptyDatum = {rowNum : '', subject : 'S', condition : '', stimulus : '', response : ''}
   const [currentData, setCurrentData] = useState([])
   const [newDatum, setNewDatum] = useState (emptyDatum)
   const [deleteMode, setDeleteMode] = useState(false)
@@ -134,21 +158,37 @@ const App = () => {
   const [saveStatus, setSaveStatus] = useState('untracked')
   const [displayHelp, setDisplayHelp] = useState(false)
   const [notificationText, setNotificationText] = useState('text')
+  const [thisSubject, setThisSubject] = useState('all')
 
   const dispatch = useDispatch() //for notification reducer
 
   //helper functions
   //this converts arrays to objects in the bulk data change handler
   const arrayToObject = (arr) => {
-    return({rowNum : arr[0], condition : arr[1], stimulus : arr[2], response : arr[3]})
+    return({rowNum : arr[0], subject : arr[1], condition : arr[2], stimulus : arr[3], response : arr[4]})
   }
   //this converts an array of data objects to a string for the switch to bulk entry mode
   const arrayToString = (arr) => {
+    const sortedArray = arr.sort(sorterer)
     const newString = arr
       .map(i => Object.values(i))
       .map(i => i.join(';'))
       .join('\n')
     return(newString)
+  }
+
+  //sorting data
+  const sorterer = (a,b) => {
+    const intA = Number(a.rowNum)
+    const intB = Number(b.rowNum)
+
+    if (intA > intB) {
+      return 1
+    } else if (intA < intB) {
+      return -1
+    } else {
+      return 0
+    }
   }
 
   //event handlers
@@ -195,6 +235,7 @@ const App = () => {
     setLoadKey('enter key . . .')
     setSaveStatus('untracked')
     setDisplayHelp(false)
+    setThisSubject('all')
     
     dispatch(notifier('app reset', 'confirm', 5))
   }
@@ -246,7 +287,7 @@ const App = () => {
         dispatch(notifier('data saved', 'confirm', 5))
       })
       .catch(error => {
-        dispatch(notifier(`${error.message}: '${loadKey}' is an invalid save key.`, 'error', 10))
+        dispatch(notifier(`${error.message}. ${error.response.data.error}`, 'error', 10))
      })
     }
   }
@@ -257,7 +298,8 @@ const App = () => {
     .loadData(loadKey)
     .then(response => {
       setCurrentData(response.data)
-      setRowNumber(response.data.length + 1)
+      const responseRows = response.data.map(i => i.rowNum)
+      setRowNumber(responseRows.length === 0 ? 1 : Math.max(...responseRows) + 1)
 
       //need to seperately load bulk data if in bulk mode
       if (bulkEntry) {
@@ -267,7 +309,7 @@ const App = () => {
       dispatch(notifier('data loaded', 'confirm', 5))
     })
     .catch(error => {
-      dispatch(notifier(`${error.message}: '${loadKey}' is an invalid save key.`, 'error', 10))
+      dispatch(notifier(`${error.message}. ${error.response.data.error}`, 'error', 10))
     })
   }
 
@@ -286,7 +328,8 @@ const App = () => {
         }
       })
       .catch(() => {
-        setSaveStatus('unsaved')
+        setSaveStatus('untracked')
+        dispatch(notifier('unable to connect to server', 'error', 5))
       })
     } else { //not in the right state for saving
       setSaveStatus('untracked')
@@ -294,27 +337,6 @@ const App = () => {
   }
 
   useEffect(checkForUnsavedChanges, [loadKey, currentData])
-
-  //want sorted in integer order, not string order
-  const sortCurrentData = () => {
-    const sorterer = (a,b) => {
-      const intA = Number(a.rowNum)
-      const intB = Number(b.rowNum)
-
-      if (intA > intB) {
-        return 1
-      } else if (intA < intB) {
-        return -1
-      } else {
-        return 0
-      }
-    }
-
-    currentData.sort(sorterer)
-
-  }
-
-  useEffect(sortCurrentData, [currentData])
 
 
   return(
@@ -337,9 +359,9 @@ const App = () => {
         {displayHelp && <HelpText />}
         <Load loadKey = {loadKey} handleKeyChange = {handleKeyChange} handleLoad = {handleLoad}/>
         <Add handleInputChange = {handleInputChange} handleBulkDataChange = {handleBulkDataChange} handleAddDatum = {handleAddDatum} newDatum = {newDatum} bulkEntry={bulkEntry} currentBulkData = {currentBulkData} rowNumber = {rowNumber}/>
-        <div className = 'flexbox-container'>
-          <Current currentData = {currentData} deleteMode = {deleteMode} deleteRow = {deleteRow}/>
-          <DisplayMetrics currentData = {currentData}/>
+        <div className = 'tables-container'>
+          <Current currentData = {currentData} deleteMode = {deleteMode} deleteRow = {deleteRow} sorterer = {sorterer}/>
+          <DisplayMetrics currentData = {currentData} thisSubject = {thisSubject} setThisSubject = {setThisSubject}/>
         </div>
       </div>
       <div>

@@ -75,7 +75,7 @@ const errorHandler = (error, request, response, next) => {
     console.log(error)
 
     if (error.name === 'CastError') {
-        return response.status(400).send({ error: 'malformed id' })
+        return response.status(400).send({ error: 'Invalid key.' })
     } else if (error.name === 'ValidationError') {
         return response.status(400).json({ error: 'This error is usually raised when trying to save a stimulus or response other than 1 or 0.'})
     }
