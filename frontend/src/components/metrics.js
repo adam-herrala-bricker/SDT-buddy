@@ -1,6 +1,7 @@
 //keeping all the code for calculating and displaying the SDT metrics seperated here
 import {useState, useEffect} from 'react'
-import {probit} from 'simple-statistics'
+
+import sdtCalculator from '../utilities/sdtCalculator'
 
 const HeaderRow = ({metrics}) => {
     return(
@@ -37,64 +38,16 @@ const DisplayMetrics = ({currentData, thisSubject, setThisSubject}) => {
         //array of unique condition names
         const conditionsSet = new Set(currentData.map(i => i.condition))
         const conditionsArray = Array.from(conditionsSet)
+        const allConditions = conditionsArray.concat('overall')
 
-        hrCalculator(conditionsArray)
+        const newMetrics = sdtCalculator(currentData, allConditions, subjects, thisSubject)
 
+        setMetrics(newMetrics)
     }
 
     //execute updateAll everytime currentData changes (coming back to this, useEffect probably isn't the right method here . . .)
     // eslint-disable-next-line
     useEffect(updateAll, [currentData, thisSubject])
-
-    //function for d'
-    const dPrime = (HR, FAR) => {return((probit(HR) - probit(FAR)).toFixed(3))}
-    
-    //function for criterion
-    const criterion = (HR, FAR) => {return(-.5*(probit(HR) + probit(FAR)).toFixed(3))}
-
-    //main function for calcuations
-    const hrCalculator = (conditionsArray) => {
-        const allConditions = conditionsArray.concat('overall')
-
-        const newMetrics = allConditions.reduce((accumulator, condition) => {
-            //filter for given subject (unless thisSubject === 'all')
-            const subjectData = thisSubject === 'all' ? currentData : currentData.filter(i => i.subject === thisSubject)
-
-            //filter if condition given
-            const condData = condition === 'overall' ? subjectData : subjectData.filter(i => i.condition === condition)
-            
-            //calculate HR and MR
-            const yesResponsesStim = condData.filter(i => i.response === "1" & i.stimulus === "1").length
-            const stimTrials = condData.filter(i => i.stimulus === "1").length
-
-            const hitRate = (yesResponsesStim/stimTrials).toFixed(3)
-            const missRate = (1-hitRate).toFixed(3)
-
-            //calculate CRR and FAR
-            const yesResponsesNoStim = condData.filter(i => i.response === '1' & i.stimulus === '0').length
-            const noStimTrials = condData.filter(i => i.stimulus === '0').length
-
-            const faRate = (yesResponsesNoStim/noStimTrials).toFixed(3)
-            const crRate = (1-faRate).toFixed(3)
-
-            //literal d' and criterion
-            const dPrimeLit = dPrime(hitRate, faRate)
-            const cLit = criterion(hitRate, faRate)
-            
-            //corrected d' and criterion
-            const adjustedHR = hitRate === '1.000' ? (stimTrials-1)/stimTrials : hitRate
-            const adjustedFAR = faRate === '0.000' ? 1/noStimTrials : faRate
-            const dPrimeCor = dPrime(adjustedHR, adjustedFAR)
-            const cCor = criterion(adjustedHR, adjustedFAR)
-
-
-            return({...accumulator, [condition]: {cond: [condition], HR: hitRate, MR: missRate, CRR: crRate, FAR: faRate, dPrimeLit : dPrimeLit, dPrimeCor: dPrimeCor, cLit: cLit, cCor: cCor}})
-    
-        }, {})
-
-        //newMetrics['metric'] = defaultMetrics.metric
-        setMetrics(newMetrics)
-    }
 
     //only display if something to display
     if (currentData.length === 0) {

@@ -44,7 +44,7 @@ const Add = ({handleInputChange, handleAddDatum, newDatum, bulkEntry, currentBul
       <div>
         <h2>Add new data (bulk entry mode)</h2>
         <p>structure each line: trialNumber;subject;condition;stimulus;response</p>
-        <p><b>IMPORTANT: don't repeat trial numbers!</b></p>
+        <p><b>IMPORTANT: don't repeat trial numbers for the same subject!</b></p>
         <textarea value={currentBulkData} onChange = {handleBulkDataChange}rows='10' cols='40'></textarea>
       </div>
     )
@@ -80,7 +80,7 @@ const Row = ({currentData, deleteMode, deleteRow, sorterer}) => {
   if (!deleteMode) {
     return(
       displayData.map(entry =>
-        <tr key = {entry.rowNum}>
+        <tr key = {`${entry.subject}-${entry.rowNum}`}>
           <td>{entry.rowNum}</td>
           <td>{entry.subject}</td>
           <td>{entry.condition}</td>
@@ -92,7 +92,7 @@ const Row = ({currentData, deleteMode, deleteRow, sorterer}) => {
   }
   return (
     displayData.map(entry =>
-      <tr key = {entry.rowNum}>
+      <tr key = {`${entry.subject}-${entry.rowNum}`}>
         <td>{entry.rowNum}</td>
         <td>{entry.subject}</td>
         <td>{entry.condition}</td>

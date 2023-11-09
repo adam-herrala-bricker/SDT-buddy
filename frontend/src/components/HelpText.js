@@ -6,6 +6,7 @@ const HelpText = () => {
             <ol>
                 <h3><li>Overview</li></h3>
                 <p>SDT Kamu helps you check whether an analysis pipeline for detection-theoretic metrics (d' and criterion) is outputting the correct values for trial-level data. It is intended for <b>educational purposes only</b> and should not be used as a research tool.</p>
+                <p>SDT Kamu can process data for one or multiple subjects. When data for more than one subject is loaded, subject mean d' and criterion can be viewed in the "all" tab.</p>
                 <h3><li>Computed values</li></h3>
                 <ul>
                     <li>Hit Rate (HR)</li>
@@ -41,7 +42,7 @@ const HelpText = () => {
                     <li>Bulk entry mode</li>
                     <p>Enter csv-structured data with one trial per line. Each line should be ordered: trialNumber;subject;condition;stimulus;response.</p>
                     <p>Use only 0 and 1 in stimulus and response fields. Any other values will cause the metrics to compute incorrectly and prevent data from saving.</p>
-                    <p><b>NOTE:</b> There is no automatic trial numbering in bulk entry mode, so it's important to ensure that every trial number is unique. Repeat trial numbers may interfere with the app rendering correctly.</p>
+                    <p><b>NOTE:</b> There is no automatic trial numbering in bulk entry mode, so it's important to ensure that every trial number is unique. Repeat trial numbers for the same subject may interfere with the app rendering correctly.</p>
                 </ul>
 
                 <h3><li>Numbering subjects</li></h3>
