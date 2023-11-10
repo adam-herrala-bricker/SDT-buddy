@@ -13,12 +13,29 @@ export const arrayToString = (arr) => {
 
 //sorting data
 export const sorterer = (a,b) => {
-    const intA = Number(a.rowNum)
-    const intB = Number(b.rowNum)
+    const codeA = a.subject[0]
+    const codeB = b.subject[0]
+    const restA = Number(a.subject.slice(1,))
+    const restB = Number(b.subject.slice(1,))
 
-    if (intA > intB) {
+    let subjectA = a.subject
+    let subjectB = b.subject
+
+    //if encoded like S1, S2, ... --> can sort like ints (so, e.g., S2 will come before S10)
+    if (codeA === 'S' && codeB === 'S' && !Number.isNaN(restA) && !Number.isNaN(restB)) {
+        subjectA = restA
+        subjectB = restB
+    }
+    
+    //sort by subject first
+    if (subjectA > subjectB) {
         return 1
-    } else if (intA < intB) {
+    } else if (subjectA < subjectB) {
+        return -1
+    //then by row number
+    } else if (Number(a.rowNum) > Number(b.rowNum)) {
+        return 1
+    } else if (Number(a.rowNum) > Number(b.rowNum)) {
         return -1
     } else {
         return 0
