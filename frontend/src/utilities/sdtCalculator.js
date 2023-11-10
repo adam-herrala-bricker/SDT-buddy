@@ -105,7 +105,6 @@ const sdtCalculator = (currentData, allConditions, subjects, thisSubject) => {
             const dPrimeCor = dPrime(adjustedHR, adjustedFAR)
             const cCor = criterion(adjustedHR, adjustedFAR)
             
-            console.log(condition, accumulator)
             return({
                 ...accumulator, 
                 [condition]: {
