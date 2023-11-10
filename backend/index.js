@@ -2,10 +2,12 @@ require('dotenv').config()
 const express = require('express')
 const morgan = require('morgan')
 const app = express()
+const cors = require('cors')
 const Entry = require('./models/entry')
 
 
 //middleware!!
+app.use(cors())
 app.use(express.json())
 app.use(express.static('../frontend/build')) //path to static build on FE
 
