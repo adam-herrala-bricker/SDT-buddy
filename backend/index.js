@@ -9,7 +9,7 @@ const Entry = require('./models/entry')
 //middleware!!
 app.use(cors())
 app.use(express.json())
-app.use(express.static('../frontend/build')) //path to static build on FE
+app.use(express.static('build')) //path to static build on FE
 
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :postRes')) //'tiny' formatting plus our custom job
 //add token to morgan for logging POST request only
