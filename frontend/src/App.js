@@ -55,6 +55,7 @@ const App = () => {
   }
 
   const handleBulkDataChange = (event) => {
+    event.preventDefault() //this has to be the problem
     const currentBulkEntry = event.target.value
     setCurrentBulkData(currentBulkEntry)
     const structuredBulkEntry = currentBulkEntry
