@@ -141,9 +141,13 @@ const sdtCalculator = (currentData, allConditions, subjects, thisSubject) => {
 
     const meanMetrics = convertArraysToMeans(groupMetrics)
 
-    return meanMetrics
+    return {
+	    meanMetrics,
+	    subjectMetrics: groupMetrics
+    }
 }
 
 
 
 export default sdtCalculator
+
