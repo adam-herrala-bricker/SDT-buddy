@@ -1,16 +1,21 @@
-import { useState, useEffect } from 'react'
+import {useState, useEffect} from 'react'
 import { useDispatch } from 'react-redux'
 import { notifier } from './reducers/notificationReducer'
 import HelpText from './components/HelpText'
 import MenuBar from './components/MenuBar'
 import Load from './components/Load'
-import Add from './components/Add'
-import Current from './components/Current'
+import Add from './components/Add';
+import Current from './components/Current';
 import DisplayMetrics from './components/DisplayMetrics'
+import TTestComponent from './components/TTestComponent'
+import Papa from "papaparse"
+import Notifications from './components/Notifications'
+import sdtCalculator from './utilities/sdtCalculator'
+import { arrayToObject, arrayToString, sorterer } from './utilities/miscHelpers'
+import { validateColumnMappings, processCSVData, remapValue } from './utilities/csvHelpers'
 import serverKamu from './services/serverKamu'
+import {fullEqualityChecker} from './utilities/objectHelper'
 
-import { fullEqualityChecker } from './utilities/objectHelper'
-import { arrayToObject, arrayToString } from './utilities/miscHelpers'
 
 
 const App = () => {
@@ -19,7 +24,7 @@ const App = () => {
   const [currentData, setCurrentData] = useState([])
   const [newDatum, setNewDatum] = useState (emptyDatum)
   const [deleteMode, setDeleteMode] = useState(false)
-  const [bulkEntry, setEntryMode] = useState(false) //whether app is in bulk entry mode
+  const [entryMode, setEntryMode] = useState('csv')
   const [currentBulkData, setCurrentBulkData] = useState('') //value of text in bulk entry
   const [rowNumber, setRowNumber] = useState(1)
   const [loadKey, setLoadKey] = useState('enter key . . .')
@@ -27,6 +32,36 @@ const App = () => {
   const [displayHelp, setDisplayHelp] = useState(false)
   const [notificationText, setNotificationText] = useState('text')
   const [thisSubject, setThisSubject] = useState('all')
+  const [mappingData, setMappingData] = useState({ sharedMap: {} });
+  const [conditions, setConditions] = useState([]);
+  const [subjectMetrics, setSubjectMetrics] = useState({});
+  const [tTestCondition1, setTTestCondition1] = useState('');
+  const [tTestCondition2, setTTestCondition2] = useState('');
+  
+  const initialColumnMappings = { // using initialColumMappings in order for handleReset to handle the input fields
+  subject: '',
+  condition: '',
+  stimulus: '',
+  response: '',
+  };
+  const [csvColumnMappings, setCsvColumnMappings] = useState(initialColumnMappings);
+
+  useEffect(() => {
+    const uniqueConditions = Array.from(new Set(currentData.map(item => item.condition))).filter(Boolean);
+    const uniqueSubjects = Array.from(new Set(currentData.map(item => item.subject)));
+
+    const { subjectMetrics: newSubjectMetrics } = sdtCalculator(currentData, uniqueConditions, uniqueSubjects, thisSubject);
+    setSubjectMetrics(newSubjectMetrics);
+
+    if (uniqueConditions.length >= 2) {
+      setTTestCondition1(uniqueConditions[0]);
+      setTTestCondition2(uniqueConditions[1]);
+    } else {
+      setTTestCondition1('');
+      setTTestCondition2('');
+    }
+  }, [currentData, thisSubject]);
+
 
   const dispatch = useDispatch() //for notification reducer
 
@@ -55,7 +90,6 @@ const App = () => {
   }
 
   const handleBulkDataChange = (event) => {
-    event.preventDefault() //this has to be the problem
     const currentBulkEntry = event.target.value
     setCurrentBulkData(currentBulkEntry)
     const structuredBulkEntry = currentBulkEntry
@@ -65,34 +99,67 @@ const App = () => {
     setCurrentData(structuredBulkEntry)
   }
 
+
+  const handleCSVUpload = (file, csvColumnMappings, currentRowNumber, updateRowNumber) => {
+    if (file) {
+      Papa.parse(file, {
+        complete: (result) => {
+          const csvHeaders = result.meta.fields; //checks the csv columns for matching
+          const missingColumns = validateColumnMappings(csvColumnMappings, csvHeaders);
+  
+          if (missingColumns.length > 0) {
+            dispatch(notifier(`Missing columns in CSV for: ${missingColumns.join(', ')}`, 'error', 5));
+            return;
+          }
+  
+          processCSVData(result, csvColumnMappings, currentRowNumber, updateRowNumber, setCurrentData, setMappingData, remapValue);
+        },
+        header: true,
+        dynamicTyping: true,
+        skipEmptyLines: true,
+      });
+    }
+  };
+
+
   const handleReset = () => {
-    //note: may want to throw a confirmation alert here at some point
-    setCurrentData([])
-    setNewDatum(emptyDatum)
-    setDeleteMode(false)
-    setRowNumber(1)
-    setCurrentBulkData('')
-    setLoadKey('enter key . . .')
-    setSaveStatus('untracked')
-    setDisplayHelp(false)
-    setThisSubject('all')
-    
-    dispatch(notifier('app reset', 'confirm', 5))
-  }
+    const confirmReset = window.confirm("Are you sure you want to reset the application? This will clear all current data.");
+  
+    if (confirmReset) {
+      setCurrentData([]);
+      setNewDatum(emptyDatum);
+      setDeleteMode(false);
+      setRowNumber(1);
+      setCurrentBulkData('');
+      setLoadKey('enter key . . .');
+      setSaveStatus('untracked');
+      setDisplayHelp(false);
+      setThisSubject('all');
+      setTTestCondition1('');
+      setTTestCondition2('');
+
+      setCsvColumnMappings(initialColumnMappings);
+
+      
+  
+      dispatch(notifier('App reset', 'confirm', 5));
+    }
+  };
 
   const toggleDeleteMode = () => {
     setDeleteMode(!deleteMode)
   }
 
-  const toggleEntryMode = () => {
-    if (!bulkEntry) { //switching to bulk --> set bulk data displayed
-      setCurrentBulkData(arrayToString(currentData))
-    } else { //switching to single --> update row number counter to avoid doubling up
-      const currentRowNumbers = currentData.map(i=>i.rowNum)
-      setRowNumber(currentRowNumbers.length === 0 ? 1 : Math.max(...currentRowNumbers) + 1) //max function gives -inf for empty array
+  const toggleEntryMode = (newMode) => {
+    setEntryMode(newMode);
+    if (newMode === 'bulk') {
+      setCurrentBulkData(arrayToString(currentData));
+    } else if (newMode === 'single' || newMode === 'csv') {
+      const currentRowNumbers = currentData.map(i => i.rowNum);
+      setRowNumber(currentRowNumbers.length === 0 ? 1 : Math.max(...currentRowNumbers) + 1);
     }
-    setEntryMode(!bulkEntry)
   }
+
 
   const deleteRow = (rowNum) => {
     const newData = currentData.filter(i => i.rowNum !== rowNum)
@@ -142,7 +209,7 @@ const App = () => {
       setRowNumber(responseRows.length === 0 ? 1 : Math.max(...responseRows) + 1)
 
       //need to seperately load bulk data if in bulk mode
-      if (bulkEntry) {
+      if (entryMode == 'bulk') {
         setCurrentBulkData(arrayToString(response.data))
       }
 
@@ -179,37 +246,70 @@ const App = () => {
   useEffect(checkForUnsavedChanges, [loadKey, currentData])
 
 
-  return(
-    <div className = 'root-container'>
+return (
+  <div className='root-container'>
       <div>
         <MenuBar 
-          handleCreateNew = {handleCreateNew}
-          handleSave = {handleSave}
-          saveStatus = {saveStatus}
-          toggleEntryMode = {toggleEntryMode}
-          toggleDeleteMode = {toggleDeleteMode}
-          handleReset = {handleReset}
-          displayHelp = {displayHelp}
-          setDisplayHelp = {setDisplayHelp}
-          notificationText = {notificationText}
-          setNotificationText = {setNotificationText}
+          handleCreateNew={handleCreateNew}
+          handleSave={handleSave}
+          saveStatus={saveStatus}
+	  entryMode={entryMode}
+          toggleEntryMode={toggleEntryMode}
+          toggleDeleteMode={toggleDeleteMode}
+          handleReset={handleReset}
+          displayHelp={displayHelp}
+          setDisplayHelp={setDisplayHelp}
+          notificationText={notificationText}
+          setNotificationText={setNotificationText}
+        />
+      <h1>SDT Kamu</h1>
+      {displayHelp && <HelpText />}
+      <Load loadKey={loadKey} handleKeyChange={handleKeyChange} handleLoad={handleLoad}/>
+      <Add 
+        handleInputChange={handleInputChange} 
+        handleBulkDataChange={handleBulkDataChange} 
+        handleAddDatum={handleAddDatum}
+        handleCSVUpload={(file, mappings) => handleCSVUpload(file, mappings, rowNumber, setRowNumber)}
+	csvColumnMappings={csvColumnMappings}
+        setCsvColumnMappings={setCsvColumnMappings}
+        newDatum={newDatum} 
+        entryMode={entryMode} 
+        currentBulkData={currentBulkData} 
+        rowNumber={rowNumber}
+      />
+      <div className='tables-container'>
+        <Current 
+          currentData={currentData} 
+          deleteMode={deleteMode} 
+          deleteRow={deleteRow} 
+          sorterer={sorterer} 
+          mappingData={mappingData}
+        />
+        <DisplayMetrics
+          currentData={currentData}
+          thisSubject={thisSubject}
+          conditions={conditions}
+          setThisSubject={setThisSubject}
+        />
+        {thisSubject === 'all' && (
+          <TTestComponent 
+              dPrimeCorValuesCond1={subjectMetrics[tTestCondition1]?.dPrimeCor || []}
+              dPrimeCorValuesCond2={subjectMetrics[tTestCondition2]?.dPrimeCor || []}
+              cCorValuesCond1={subjectMetrics[tTestCondition1]?.cCor || []}
+              cCorValuesCond2={subjectMetrics[tTestCondition2]?.cCor || []}
           />
-        <h1>SDT Kamu</h1>
-        {displayHelp && <HelpText />}
-        <Load loadKey = {loadKey} handleKeyChange = {handleKeyChange} handleLoad = {handleLoad}/>
-        <Add handleInputChange = {handleInputChange} handleBulkDataChange = {handleBulkDataChange} handleAddDatum = {handleAddDatum} newDatum = {newDatum} bulkEntry={bulkEntry} currentBulkData = {currentBulkData} rowNumber = {rowNumber}/>
-        <div className = 'tables-container'>
-          <Current currentData = {currentData} deleteMode = {deleteMode} deleteRow = {deleteRow}/>
-          <DisplayMetrics currentData = {currentData} thisSubject = {thisSubject} setThisSubject = {setThisSubject}/>
-        </div>
-      </div>
-      <div>
-        <footer>
-          SDT Kamu developed by Adam Herrala Bricker for TBMC3001 Psychophysics: Theory and Application. University of Turku. 2023. 
-        </footer>
+        )}
       </div>
     </div>
-  )
+    <div>
+      <footer>
+        SDT Kamu developed by Adam Herrala Bricker for TBMC3001 Psychophysics: Theory and Application. University of Turku. 2023. 
+      </footer>
+    </div>
+  </div>
+)
+
+
 }
 
 
