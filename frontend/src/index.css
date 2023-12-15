@@ -81,7 +81,7 @@
     flex-direction: column;
     align-items: center;
 
-    justify-content: flex-end;
+    justify-content: end;
 }
 
 .dark-button {
@@ -122,6 +122,19 @@
 
 button {
     margin-left: 2px;
+}
+
+.menu-dropdown {
+  background-color: #grey;
+  color: black;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* Style for the dropdown options */
+.menu-dropdown option {
+  background-color: #grey; /* Background color for options */
+  color: black; /* Text color for options */
 }
 
 table {
