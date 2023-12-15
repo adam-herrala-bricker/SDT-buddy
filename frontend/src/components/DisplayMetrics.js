@@ -24,11 +24,14 @@ const Columnizer = ({metrics, rowIDs, defaultMetrics}) => {
     )
 }
 
+
+
+
 const DisplayMetrics = ({currentData, thisSubject, setThisSubject}) => {
     const rowIDs = ['HR', 'MR', 'CRR', 'FAR', 'dPrimeLit', 'dPrimeCor', 'cLit', 'cCor']
     const defaultMetrics = {metric : {cond: 'metric', HR: 'HR', MR: 'MR', CRR: 'CRR', FAR: 'FAR', dPrimeLit: "d' (literal)", dPrimeCor: "d' (corrected)", cLit: "c (literal)", cCor: "c (corrected)"}}
 
-    const [metrics, setMetrics] = useState(defaultMetrics)
+    const [metrics, setMetrics] = useState({ meanMetrics: defaultMetrics, subjectMetrics: {} })
 
     //Array of unique subjects (plus 'all')
     const subjects = Array.from(new Set(currentData.map(i => i.subject))).concat('all')
@@ -65,11 +68,11 @@ const DisplayMetrics = ({currentData, thisSubject, setThisSubject}) => {
                 <thead className='boader-head'>
                     <tr>
                     <th></th>
-                    <HeaderRow metrics = {metrics}/>
+                    <HeaderRow metrics = {metrics.meanMetrics}/>
                     </tr>
                 </thead>
                 <tbody>
-                    <Columnizer metrics = {metrics} rowIDs ={rowIDs} defaultMetrics = {defaultMetrics}/>
+                    <Columnizer metrics = {metrics.meanMetrics} rowIDs ={rowIDs} defaultMetrics = {defaultMetrics}/>
                 </tbody>
             </table>
         </div>
@@ -78,3 +81,4 @@ const DisplayMetrics = ({currentData, thisSubject, setThisSubject}) => {
 }
 
 export default DisplayMetrics
+
