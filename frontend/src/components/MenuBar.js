@@ -4,6 +4,7 @@ const MenuBar = ({
     handleCreateNew,
     handleSave, 
     saveStatus, 
+    entryMode,
     toggleEntryMode, 
     toggleDeleteMode, 
     handleReset,
@@ -18,7 +19,11 @@ const MenuBar = ({
           <div className = 'button-container'>
             <button onClick = {handleCreateNew}>new save key</button>
             <button onClick = {handleSave} className = {saveStatus}>save dataset</button>
-            <button onClick = {toggleEntryMode}>toggle entry mode</button>
+            <select value={entryMode} onChange={(e) => toggleEntryMode(e.target.value)} className='menu-dropdown'>
+              <option value="single">Single Entry</option>
+              <option value="bulk">Bulk Entry</option>
+              <option value="csv">CSV Upload</option>
+            </select>
             <button onClick = {toggleDeleteMode}>toggle edit mode</button>
             <button onClick = {handleReset}>reset application</button>
             <button onClick = {() => setDisplayHelp(!displayHelp)} className = {displayHelp ? 'dark-button' : ''}>help</button>
@@ -31,3 +36,4 @@ const MenuBar = ({
 }
 
 export default MenuBar
+
